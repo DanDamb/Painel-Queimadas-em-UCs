@@ -1,8 +1,11 @@
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
+# App Shiny web 
+# Para rodar, clique no botão 'Run App' ou 'Reload App' logo acima (no RStudio)
 #
-## Referência: Shiny
+# Alternativamente: execute todo o código do script.
+#
+###
+## Principal Referência: Shiny
 #    https://shiny.posit.co/
 #
 ## Publicado em :
@@ -111,9 +114,9 @@ dashSidebar <-  dashboardSidebar(
     menuItem("Widgets", tabName = "widgets", icon = icon("th"),
              badgeLabel = "new", badgeColor = "green"),
     menuItem("Dados", icon = icon("database"), 
-             href = "https://www.kaggle.com/datasets/dandamb/reas-queimadas-em-ucs-federais"))
+             href = "https://www.kaggle.com/datasets/dandamb/reas-queimadas-em-ucs-federais"),
     menuItem("Código", icon = icon("file-code"), 
-             href = "https://www.kaggle.com/datasets/dandamb/reas-queimadas-em-ucs-federais")
+             href = "https://github.com/DanDamb/Painel-Queimadas-em-UCs")
   )
 )
 ####
