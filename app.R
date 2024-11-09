@@ -1,5 +1,5 @@
-#
-# App Shiny web 
+###
+## App Shiny web 
 # Para rodar, clique no botão 'Run App' ou 'Reload App' logo acima (no RStudio)
 #
 # Alternativamente: execute todo o código do script.
@@ -15,8 +15,6 @@
 # https://www.gov.br/icmbio/pt-br/acesso-a-informacao/dados-abertos
 # https://dados.gov.br/dados/conjuntos-dados/incendios-em-unidades-de-conservacao-federais
 
-
-
 library(tidyr)
 library(dplyr)
 library(shiny)
@@ -24,18 +22,17 @@ library(shinydashboard)
 library(plotly)
 library(ggplot2)
 library(rsconnect)
-
-#########
-# Conexão ao servidor
-#rsconnect::setAccountInfo(name='bs1v8e-daniel-dambroski0c0defreitas',
-#                          token='CCFB31F9A9E526C8B8C475AC4BBC4CE9',
-#                          secret='<SECRET>')
-
+library(sf)
 library(readr)
 
+###
+## Conexão ao servidor
+#rsconnect::setAccountInfo(name='XXXXXXXXXXXXXXXXXXXXXX',
+#                          token='XXXXXXXXXXXXXXXXXXXXXX',
+#                          secret='XXXXXXXXXXXXXXXXXXXXXX')
 
-###########
-# Carregando do arquivo
+###
+## Carregando do arquivo local (para testes)
 # library(readr)
 # q_df <- read_delim("~/Documentos/Curo_R_420/Projetos_R/Dados/queimadas_UCs_federais.csv", 
 #                     delim = ";", escape_double = FALSE, col_types = cols(ANO = col_integer()), 
@@ -48,13 +45,16 @@ library(readr)
 ## Carregando os dados do Dropbox
 #
 #link_url <- "https://www.dropbox.com/scl/fi/w0be02uu6cfgwbkgynnfx/queimadas_UCs_federais.csv?rlkey=uciu3fz6g6wc8tpj15sg0sywa&st=mq8vlubx&dl=1"
-#q_df <- read_csv2(link_url)
+link_url <- "https://www.dropbox.com/scl/fi/5i3y64ksm4ai5h2adspus/q_sf_df.geojson?rlkey=nscc7yctobic1yezha1n1o7o4&st=acs5xvnu&dl=1"
+q_df <- st_read(link_url)
+
+link_url2 <- "https://www.dropbox.com/scl/fi/o1t4djero0ly2gmhjpvbz/br_sf_df.geojson?rlkey=gdlw8bxgpozc1yo13k1gl5oka&st=1tml6lgj&dl=1"
+br_df <- st_read(link_url2)
 
 
-############
 
-############
-## INTERFACE DE USUÁRIO
+#######
+#### INTERFACE DE USUÁRIO
 ## Header
 dashHeader <- dashboardHeader(title = "Painel Queimadas",
                               dropdownMenu(type = "messages",
@@ -107,7 +107,9 @@ dashHeader <- dashboardHeader(title = "Painel Queimadas",
                                            )
                               )
 )
+###
 ## Sidebar
+#
 dashSidebar <-  dashboardSidebar(
   sidebarMenu(
     menuItem("Painel", tabName = "dashboard", icon = icon("dashboard")),
@@ -126,6 +128,12 @@ dashBody <-  dashboardBody(
   tabItems(
     # First tab content - PAINEL
     tabItem(tabName = "dashboard",
+            fluidRow(
+              box(title = "Mapa de calor das queimadas em UCs.",
+                  status = "success",
+                  collapsible = TRUE,
+                  plotOutput("plot0", 
+                             height = 300))),
             fluidRow(
               box(
                 title = "Total de área queimada a cada ano.", 
@@ -160,7 +168,7 @@ dashBody <-  dashboardBody(
               box(title = "Histograma do tamamho das áreas queimadas.", 
                   status = "primary", 
                   plotOutput("plot2", height = 250)
-                  ),
+              ),
               box(
                 title = "Controles do histograma.", 
                 status = "primary",
@@ -178,12 +186,15 @@ dashBody <-  dashboardBody(
   )
 )
 
-####
-## Interface de usuário (UI)
-#
+########
+#### Interface de usuário (UI)
+##
 ui <- dashboardPage( dashHeader, dashSidebar, dashBody)
 
 
+###
+## Pre processa dados
+#
 
 histdata <- data.frame(q_df$ANO)
 histdata2 <- q_df[q_df$AREA < 100000,] #|> filter(AREA > 10000) |> select(AREA)
@@ -199,7 +210,23 @@ data3 <- q_df |>
 ## Funções do lado do servidor
 #
 server <- function(input, output) {
-  # plot1
+  # mapa
+  output$plot0 <- renderPlot({
+    ggplot() +
+      geom_sf(data = br_df, color='gray50', fill = 'gray90') +
+      geom_sf(data = q_df, aes(geometry = geometry), inherit.aes = FALSE) + 
+      stat_density_2d(data = q_df, 
+                      aes(x = st_coordinates(geometry)[,1],
+                          y = st_coordinates(geometry)[,2],
+                          fill = ..density..,
+                          alpha = ..density..), 
+                      geom = 'raster', contour = FALSE) +
+      scale_fill_gradientn(colors = heat.colors(1), guide = "none") +
+      scale_alpha_continuous(range = c(0.0, 1.0)) +
+      geom_sf(data = q_df, color='yellow', size = 0.1, fill = NA) +
+      labs(title = "Mapa de calor das áreas queimadas em UCs federais", x = "", y = "") +
+      theme_minimal()
+  })
   output$plot1 <- renderPlot({
     #hist(histdata, breaks = input$slider, main = "histograma do nº de queimadas\n por ano")
     ggplot(data = q_df, aes(x=ANO)) +
@@ -251,11 +278,12 @@ server <- function(input, output) {
   })
 }
 
-#########
-# Chamada da função que gera o painel
-
+########
+#### Chamada da função que gera o painel
+##
 shinyApp(ui, server)
 
+# para publicar o painel utilize o RStudio
 
 ## Referencias
 # https://rstudio.github.io/shinydashboard/structure.html
@@ -266,4 +294,3 @@ shinyApp(ui, server)
 
 # https://rstudio.github.io/shinydashboard/examples.html - exemplos de uso do shinyDashboard
 # https://rpubs.com/nickstambaugh/RforBizIntel - um exemplo para testar depois
-
