@@ -7,5 +7,5 @@ Visualisação dos dados de áreas queimadas, em hectares, no interior de Unidad
 
 [Dados abertos ICMBio](https://www.gov.br/icmbio/pt-br/acesso-a-informacao/dados-abertos)
 
-[Incêndios em UCs federais](https://dados.gov.br/dados/conjuntos-dados/incendios-em-unidades-de-conservacao-federais)
+[Incêndios em UCs federais](https://dados.gov.br/dados/conjuntos-dados/incendios-em-unidades-de-conservacao-federais) Áreas Queimadas em Unidades de Conservação Federais: Divisão de Informações Geoespaciais e Monitoramento - DGEO, obtido em 07/10/2024. O link retorna 'Página não encontrada' desde em novembro de 2024.
 
